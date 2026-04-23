@@ -35,14 +35,18 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'login berhasil',
             'token' => $token,
-            'role' => $user->role
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'role' => $user->role
+            ]
         ]);
     }
 
     public function register(Request $request)
     {
         $request->validate([
-            'name' => 'required',
+            'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6'
         ]);
