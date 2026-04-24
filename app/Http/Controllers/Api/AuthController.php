@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -17,7 +18,7 @@ class AuthController extends Controller
         ]);
 
         // cari user berdasarkan email
-        $user = \App\Models\User::where('email', $request->email)->first();
+        $user = User::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
@@ -43,8 +44,7 @@ class AuthController extends Controller
         ]);
     }
 
-    public function register(Request $request)
-    {
+    public function register(Request $request) {
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
@@ -60,6 +60,32 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Register berhasil',
+            'user' => $user
+        ]);
+    }
+
+    public function createdAdmin(Request $request) {
+        $authUser = $request->attributes->get('user');
+        if ($authUser->role !== 'admin') {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+        
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:6',
+            'role' => 'required|in:admin,user',
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'role' => $request->role,
+        ]);
+
+        return response()->json([
+            'message' => 'User berhasil dibuat',
             'user' => $user
         ]);
     }

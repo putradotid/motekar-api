@@ -12,12 +12,15 @@ Route::middleware('auth.token')->group(function() {
     
     // route user
     Route::post('/meetings', [MeetingController::class, 'store']);
-    Route::get('/my-meetings', [MeetingController::class, 'MyMeetings']);
+    Route::get('/my-meetings', [MeetingController::class, 'myMeetings']);
     
     // route admin
     Route::post('/admin/meetings', [MeetingController::class, 'index']);
-    Route::put('/admin/meetings/{id}/approve', [MeetingController::class, 'approve']);
+    Route::put('/admin/meetings/{id}/approve', [MeetingController::class, 'approved']);
     Route::put('/admin/meetings/{id}/reject', [MeetingController::class, 'reject']);
+
+    // create admin
+    Route::post('/admin/users', [AuthController::class, 'createdAdmin']);
 
     // logout
     Route::post('/logout', [AuthController::class, 'logout']);

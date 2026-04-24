@@ -17,7 +17,7 @@ class MeetingController extends Controller
 
         $user = $request->attributes->get('user');
 
-        $meeting = MeetingRequests::created([
+        $meeting = MeetingRequests::create([
             'user_id' => $user->id,
             'title' => $request->title,
             'description' => $request->description,
@@ -31,7 +31,7 @@ class MeetingController extends Controller
     }
 
     // user melihat list milih sendiri
-    public function MyMeetings(Request $request) {
+    public function myMeetings(Request $request) {
         $user = $request->attributes->get('user');
 
         $data = MeetingRequests::where('user_id', $user->id, )->latest()->get();
@@ -39,5 +39,43 @@ class MeetingController extends Controller
         return response()->json($data);
     }
     
+    // admin melihat semua list request
+    public function index(Request $request) {
+        $user = $request->attributes->get('user');
+        if ($user->role !== 'admin') {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
 
+        return MeetingRequests::latest()->get();
+    }
+
+    // admin approved
+    public function approved(Request $request, $id) {
+        $user = $request->attributes->get('user');
+        if ($user->role !== 'admin') {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $meeting = MeetingRequests::findOrFail($id);
+        $meeting->update([
+            'status' => 'approved',
+            'approved_by' => $user->id
+        ]);
+    }
+
+    // admin reject
+    public function reject(Request $request, $id) {
+        $user = $request->attributes->get('user');
+        if ($user->role !== 'admin') {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $meeting = MeetingRequests::findOrFail($id);
+        $meeting->update([
+            'status' => 'rejected',
+            'approved_by' => $user->id
+        ]);
+
+        return response()->json($meeting);
+    }
 }
