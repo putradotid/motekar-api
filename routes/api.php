@@ -18,6 +18,7 @@ Route::middleware('auth.token')->group(function() {
     Route::post('/admin/meetings', [MeetingController::class, 'index']);
     Route::put('/admin/meetings/{id}/approve', [MeetingController::class, 'approved']);
     Route::put('/admin/meetings/{id}/reject', [MeetingController::class, 'reject']);
+    Route::put('/admin/meetings/{id}/done', [MeetingController::class, 'done']);
 
     // create admin
     Route::post('/admin/users', [AuthController::class, 'createdAdmin']);
