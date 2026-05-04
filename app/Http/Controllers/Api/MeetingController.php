@@ -34,7 +34,16 @@ class MeetingController extends Controller
     public function myMeetings(Request $request) {
         $user = $request->attributes->get('user');
 
-        $data = MeetingRequests::where('user_id', $user->id, )->latest()->get();
+        // Search & paginate
+        $search  = $request->get('search', '');
+        $perPage = $request->get('per_page', 5);
+
+        $data = MeetingRequests::where('user_id', $user->id, )
+            ->when($search, function ($query) use ($search) {
+                $query->where('title', 'like', '%' . $search . '%');
+            })
+            ->latest()
+            ->paginate($perPage);
 
         return response()->json($data);
     }
@@ -46,11 +55,21 @@ class MeetingController extends Controller
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
-        return MeetingRequests::latest()->get();
+        $search  = $request->get('search', '');
+        $perPage = $request->get('per_page', 10);
+
+        $data = MeetingRequests::with('user')
+            ->when($search, function ($query) use ($search) {
+                $query->where('title', 'like', '%' . $search . '%');
+            })
+            ->latest()
+            ->paginate($perPage);
+
+        return response()->json($data);
     }
 
     // admin approved
-    public function approved(Request $request, $id) {
+    public function approved(Request $request, int $id) {
         $user = $request->attributes->get('user');
         if ($user->role !== 'admin') {
             return response()->json(['message' => 'Forbidden'], 403);
@@ -61,10 +80,12 @@ class MeetingController extends Controller
             'status' => 'approved',
             'approved_by' => $user->id
         ]);
+
+        return response()->json($meeting);
     }
 
     // admin reject
-    public function reject(Request $request, $id) {
+    public function reject(Request $request, int $id) {
         $user = $request->attributes->get('user');
         if ($user->role !== 'admin') {
             return response()->json(['message' => 'Forbidden'], 403);
@@ -80,7 +101,7 @@ class MeetingController extends Controller
     }
 
     // admin meeting request done
-    public function done(Request $request, $id) {
+    public function done(Request $request, int $id) {
         $user = $request->attributes->get('user');
         if ($user->role !== 'admin') {
             return response()->json(['message' => 'Forbidden'], 403);
