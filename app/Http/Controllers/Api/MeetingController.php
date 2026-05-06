@@ -30,7 +30,19 @@ class MeetingController extends Controller
         ], 201);
     }
 
-    // user melihat list milih sendiri
+    // list stats pada user
+    public function stats(Request $request) {
+        $user = $request->attributes->get('user');
+
+        return response()->json([
+            'pending'   => MeetingRequests::where('user_id', $user->id)->where('status', 'pending')->count(),
+            'approved'  => MeetingRequests::where('user_id', $user->id)->where('status', 'approved')->count(),
+            'rejected'  => MeetingRequests::where('user_id', $user->id)->where('status', 'rejected')->count(),
+            'done'      => MeetingRequests::where('user_id', $user->id)->where('status', 'done')->count(),
+        ]);
+    }
+
+    // user melihat list milik sendiri
     public function myMeetings(Request $request) {
         $user = $request->attributes->get('user');
 
@@ -46,6 +58,24 @@ class MeetingController extends Controller
             ->paginate($perPage);
 
         return response()->json($data);
+    }
+
+    // user cancel meeting request
+    public function cancel(Request $request, int $id) {
+        $user = $request->attributes->get('user');
+        $meeting = MeetingRequests::where('id', $id)->where('user_id', $user->id)->firstOrFail();
+
+        if ($meeting->status == 'done') {
+            return response()->json([
+                'message' => 'Meeting yang sudah selesai tidak dapat dibatalkan.'
+            ], 422);
+        }
+
+        $meeting->delete();
+
+        return response()->json([
+            'message' => 'Meeting berhasil dibatalkan.'
+        ]);
     }
     
     // admin melihat semua list request

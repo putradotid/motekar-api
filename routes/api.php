@@ -13,6 +13,8 @@ Route::middleware('auth.token')->group(function() {
     // route user
     Route::post('/meetings', [MeetingController::class, 'store']);
     Route::get('/my-meetings', [MeetingController::class, 'myMeetings']);
+    Route::get('/my-meetings/stats', [MeetingController::class, 'stats']);
+    Route::delete('/my-meetings/{id}', [MeetingController::class, 'cancel']);
     
     // route admin
     Route::get('/admin/meetings', [MeetingController::class, 'index']);
