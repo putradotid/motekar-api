@@ -98,6 +98,24 @@ class MeetingController extends Controller
         return response()->json($data);
     }
 
+    // admin statistics
+    public function statistics(Request $request)
+    {
+        $user = $request->attributes->get('user');
+
+        if ($user->role !== 'admin') {
+            return response()->json(['message' => 'Forbiden'], 403);
+        }
+
+        return response()->json([
+            'total' => MeetingRequests::count(),
+            'pending' => MeetingRequests::where('status', 'pending')->count(),
+            'aprroved' => MeetingRequests::where('status', 'approved')->count(),
+            'rejected' => MeetingRequests::where('status', 'rejected')->count(),
+            'done' => MeetingRequests::where('status', 'done')->count(),
+        ]);
+    }
+
     // admin approved
     public function approved(Request $request, int $id) {
         $user = $request->attributes->get('user');
