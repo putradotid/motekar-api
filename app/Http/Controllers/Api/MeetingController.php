@@ -86,11 +86,19 @@ class MeetingController extends Controller
         }
 
         $search  = $request->get('search', '');
+        $status = $request->get('status', '');
+        $date = $request->get('date', '');
         $perPage = $request->get('per_page', 10);
 
         $data = MeetingRequests::with('user')
             ->when($search, function ($query) use ($search) {
                 $query->where('title', 'like', '%' . $search . '%');
+            })
+            ->when($status, function ($query) use ($status) {
+                $query->where('status', $status);
+            })
+            ->when($date, function ($query) use ($date) {
+                $query->whereDate('date', $date);
             })
             ->latest()
             ->paginate($perPage);
@@ -110,7 +118,7 @@ class MeetingController extends Controller
         return response()->json([
             'total' => MeetingRequests::count(),
             'pending' => MeetingRequests::where('status', 'pending')->count(),
-            'aprroved' => MeetingRequests::where('status', 'approved')->count(),
+            'approved' => MeetingRequests::where('status', 'approved')->count(),
             'rejected' => MeetingRequests::where('status', 'rejected')->count(),
             'done' => MeetingRequests::where('status', 'done')->count(),
         ]);

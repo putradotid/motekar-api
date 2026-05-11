@@ -19,7 +19,7 @@ Route::middleware('auth.token')->group(function() {
     // route admin
     Route::get('/admin/meetings', [MeetingController::class, 'index']);
     Route::get('/admin/statistics', [MeetingController::class, 'statistics']);
-    Route::put('/admin/meetings/{id}/approve', [MeetingController::class, 'approved']);
+    Route::put('/admin/meetings/{id}/approved', [MeetingController::class, 'approved']);
     Route::put('/admin/meetings/{id}/reject', [MeetingController::class, 'reject']);
     Route::put('/admin/meetings/{id}/done', [MeetingController::class, 'done']);
 
