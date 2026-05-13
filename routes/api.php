@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ManageUserController;
 use App\Http\Controllers\Api\MeetingController;
 
 // Auth
@@ -25,22 +26,13 @@ Route::middleware('auth.token')->group(function() {
 
     // create admin
     Route::post('/admin/users', [AuthController::class, 'createdAdmin']);
+    
+    // manage user
+    Route::get('/admin/users', [ManageUserController::class, 'ListUser']);
+    Route::put('/admin/users/{id}/suspend', [ManageUserController::class, 'suspend']);
+    Route::put('/admin/users/{id}/active', [ManageUserController::class, 'active']);
+
 
     // logout
     Route::post('/logout', [AuthController::class, 'logout']);
-});
-
-// testing api dan middleware (optional bisa di hapus)
-Route::get('/test', function () {
-    return response()->json(['message' => 'API OK']);
-});
-
-Route::middleware('auth.token')->group(function () {
-
-    Route::get('/test-auth', function () {
-        return response()->json([
-            'message' => 'Berhasil akses dengan token'
-        ]);
-    });
-
 });

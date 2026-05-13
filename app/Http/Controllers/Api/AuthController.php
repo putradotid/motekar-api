@@ -26,6 +26,12 @@ class AuthController extends Controller
             ], 401);
         };
 
+        if ($user->status === 'suspend') {
+            return response()->json([
+                'message' => 'Akun anda telah disuspend. Hubungi administrator.'
+            ], 403);
+        }
+
         // generate token baru
         $token = Str::random(60);
 
@@ -51,7 +57,7 @@ class AuthController extends Controller
             'password' => 'required|min:6'
         ]);
 
-        $user = \App\Models\User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => bcrypt($request->password),
