@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ManageUserController;
 use App\Http\Controllers\Api\MeetingController;
 
@@ -16,6 +17,9 @@ Route::middleware('auth.token')->group(function() {
     Route::get('/my-meetings', [MeetingController::class, 'myMeetings']);
     Route::get('/my-meetings/stats', [MeetingController::class, 'stats']);
     Route::delete('/my-meetings/{id}', [MeetingController::class, 'cancel']);
+    
+    Route::get('/profile', [ProfileController::class, 'show']);
+    Route::put('/profile', [ProfileController::class, 'update']);
     
     // route admin
     Route::get('/admin/meetings', [MeetingController::class, 'index']);
