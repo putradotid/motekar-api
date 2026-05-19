@@ -169,4 +169,38 @@ class MeetingController extends Controller
 
         return response()->json($meeting);
     }
+
+    // admin mendapatkan meeting 5 terbaru
+    public function recentMeeting(Request $request)
+    {
+        $user = $request->attributes->get('user');
+        if ($user->role !== 'admin') {
+            return response()->json(['message' => 'Forbiden'], 403);
+        }
+
+        $data = MeetingRequests::with('user')
+            ->latest()
+            ->take(5)
+            ->get();
+
+        return response()->json($data);
+    }
+
+    // stat perbulan pada dashboard
+    public function monthlyStats(Request $request)
+    {
+        $user = $request->attributes->get('user');
+        if ($user->role !== 'admin') {
+            return response()->json(['message' => 'Forbiden'], 403);
+        }
+
+        $data =MeetingRequests::selectRaw('MONTH(created_at) as month, YEAR(created_at) as year, COUNT(*) as total')
+            ->where('created_at', '>=', now()->subMonth(6))
+            ->groupBy('year', 'month')
+            ->orderBy('year')
+            ->orderBy('month')
+            ->get();
+        
+        return response()->json($data);
+    }
 }
