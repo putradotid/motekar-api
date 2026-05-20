@@ -203,4 +203,27 @@ class MeetingController extends Controller
         
         return response()->json($data);
     }
+
+    // Ambil semua meeting approved untuk calendar
+    public function calendarEvents(Request $request)
+    {
+        $user = $request->attributes->get('user');
+        if ($user->role !== 'admin') {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $meetings = MeetingRequests::with('user')
+            ->where('status', 'approved')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id'    => $item->id,
+                    'title' => $item->user->name . ' — ' . $item->title,
+                    'start' => $item->date,
+                    'color' => '#FF8C00',
+                ];
+            });
+
+        return response()->json($meetings);
+    }
 }
