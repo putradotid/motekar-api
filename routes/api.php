@@ -26,6 +26,7 @@ Route::middleware('auth.token')->group(function() {
     Route::get('/admin/meetings/monthly', [MeetingController::class, 'monthlyStats']);
     Route::get('/admin/meetings/calendar', [MeetingController::class, 'calendarEvents']);
     Route::get('/admin/meetings', [MeetingController::class, 'index']);
+    Route::get('/admin/meetings/{id}', [MeetingController::class, 'show']);
     Route::get('/admin/statistics', [MeetingController::class, 'statistics']);
     Route::put('/admin/meetings/{id}/approved', [MeetingController::class, 'approved']);
     Route::put('/admin/meetings/{id}/reject', [MeetingController::class, 'reject']);

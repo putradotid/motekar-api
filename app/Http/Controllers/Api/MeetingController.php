@@ -106,6 +106,19 @@ class MeetingController extends Controller
         return response()->json($data);
     }
 
+    // admin melihat detail meeting request
+    public function show(Request $request, int $id) 
+    {
+        $user = $request->attributes->get('user');
+        if ($user->role !== 'admin') {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $meeting = MeetingRequests::with('user')->findOrFail($id);
+
+        return response()->json($meeting);
+    }
+
     // admin statistics
     public function statistics(Request $request)
     {
