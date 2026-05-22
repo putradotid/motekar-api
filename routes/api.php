@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ManageUserController;
 use App\Http\Controllers\Api\MeetingController;
+use App\Http\Controllers\Api\MessageController;
 
 // Auth
 Route::post('/login', [AuthController::class, 'login']);
@@ -40,6 +41,10 @@ Route::middleware('auth.token')->group(function() {
     Route::put('/admin/users/{id}/suspend', [ManageUserController::class, 'suspend']);
     Route::put('/admin/users/{id}/active', [ManageUserController::class, 'active']);
 
+    // message
+    Route::get('/messages', [MessageController::class, 'meetings']); // list meeting
+    Route::get('/messages/{meetingId}', [MessageController::class, 'index']);    // pesan per meeting
+    Route::post('/messages/{meetingId}', [MessageController::class, 'store']);    // kirim pesan
 
     // logout
     Route::post('/logout', [AuthController::class, 'logout']);

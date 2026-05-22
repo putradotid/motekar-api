@@ -21,4 +21,15 @@ class MeetingRequests extends Model
     public function logs() {
         return $this->hasMany(MeetingLog::class, 'meeting_id');
     }
+
+    // Relasi ke Message
+    public function messages()
+    {
+        return $this->hasMany(Message::class, 'meeting_request_id');
+    }
+
+    public function latestMessage()
+    {
+        return $this->hasOne(Message::class, 'meeting_request_id')->latest();
+    }
 }
