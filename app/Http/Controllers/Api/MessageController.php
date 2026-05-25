@@ -14,8 +14,6 @@ class MessageController extends Controller
     {
         $user = $request->attributes->get('user');
 
-        // Admin → semua meeting
-        // User → hanya meeting milik sendiri
         $meetings = MeetingRequests::with(['user', 'latestMessage'])
             ->when($user->role !== 'admin', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
@@ -24,13 +22,16 @@ class MessageController extends Controller
             ->latest()
             ->get()
             ->map(function ($item) {
+                // ✅ Ganti nullsafe operator dengan cara biasa
+                $lastMessage = $item->latestMessage;
+
                 return [
-                    'id'             => $item->id,
-                    'title'          => $item->title,
-                    'user'           => $item->user,
-                    'status'         => $item->status,
-                    'last_message'   => $item->latestMessage?->message ?? '-',
-                    'last_time'      => $item->latestMessage?->created_at?->format('H:i') ?? '',
+                    'id'           => $item->id,
+                    'title'        => $item->title,
+                    'user'         => $item->user,
+                    'status'       => $item->status,
+                    'last_message' => $lastMessage ? $lastMessage->message : '-',
+                    'last_time'    => $lastMessage ? $lastMessage->created_at->format('H:i') : '',
                 ];
             });
 
