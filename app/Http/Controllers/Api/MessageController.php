@@ -22,7 +22,6 @@ class MessageController extends Controller
             ->latest()
             ->get()
             ->map(function ($item) {
-                // ✅ Ganti nullsafe operator dengan cara biasa
                 $lastMessage = $item->latestMessage;
 
                 return [

@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ManageUserController;
 use App\Http\Controllers\Api\MeetingController;
 use App\Http\Controllers\Api\MessageController;
+use App\Http\Controllers\Api\MediaController;
 
 // Auth
 Route::post('/login', [AuthController::class, 'login']);
@@ -42,9 +43,15 @@ Route::middleware('auth.token')->group(function() {
     Route::put('/admin/users/{id}/active', [ManageUserController::class, 'active']);
 
     // message
-    Route::get('/messages', [MessageController::class, 'meetings']); // list meeting
-    Route::get('/messages/{meetingId}', [MessageController::class, 'index']);    // pesan per meeting
-    Route::post('/messages/{meetingId}', [MessageController::class, 'store']);    // kirim pesan
+    Route::get('/messages', [MessageController::class, 'meetings']);
+    Route::get('/messages/{meetingId}', [MessageController::class, 'index']);
+    Route::post('/messages/{meetingId}', [MessageController::class, 'store']);
+
+    // media
+    Route::get('/admin/media', [MediaController::class, 'index']);
+    Route::post('/admin/media', [MediaController::class, 'store']);
+    Route::get('/admin/media/{id}', [MediaController::class, 'show']);
+    Route::delete('/admin/media/{id}', [MediaController::class, 'destroy']);
 
     // logout
     Route::post('/logout', [AuthController::class, 'logout']);
