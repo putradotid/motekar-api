@@ -14,7 +14,8 @@ class MeetingRequests extends Model
         'description',
         'date',
         'status',
-        'approved_by'
+        'approved_by',
+        'attachment',
     ];
 
     public function user()

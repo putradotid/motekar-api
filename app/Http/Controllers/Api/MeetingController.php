@@ -12,16 +12,24 @@ class MeetingController extends Controller
     public function store(Request $request) {
         $request->validate([
             'title' => 'required|string|max:255',
-            'date' => 'required|date'
+            'date' => 'required|date',
+            'attachment' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:3072',
         ]);
 
         $user = $request->attributes->get('user');
+
+        $attachmentPath = null;
+        if ($request->hasFile('attachment')) {
+            $attachmentPath = $request->file('attachment')
+                ->store('attachments', 'public');
+        }
 
         $meeting = MeetingRequests::create([
             'user_id' => $user->id,
             'title' => $request->title,
             'description' => $request->description,
             'date' => $request->date,
+            'attachment' => $attachmentPath,
         ]);
 
         return response()->json([
