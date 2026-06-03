@@ -13,6 +13,7 @@ class MeetingRequests extends Model
         'title',
         'description',
         'date',
+        'time_end',
         'status',
         'approved_by',
         'attachment',

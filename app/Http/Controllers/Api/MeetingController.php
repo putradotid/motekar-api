@@ -12,12 +12,48 @@ class MeetingController extends Controller
     public function store(Request $request) {
         $request->validate([
             'title' => 'required|string|max:255',
-            'date' => 'required|date',
+            'date' => 'required|date|after_or_equal:today',
+            'time_end'   => 'nullable|string',
             'attachment' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:3072',
         ]);
 
         $user = $request->attributes->get('user');
+        $datetime = $request->date;
+        $tanggal   = substr($datetime, 0, 10);
+        $timeStart = substr($request->date, 11, 5);
+        $timeEnd   = substr($request->time_end, 0, 5);
 
+        // validasi jam meeting
+        if ($timeStart < '08:00' || $timeStart > '17:00') {
+            return response()->json([
+                'message' => 'Waktu meeting harus antara pukul 08:00 hingga 17:00.'
+            ], 422);
+        }
+        if ($timeEnd < '08:00' || $timeEnd > '17:00') {
+            return response()->json([
+                'message' => 'Jam selesai harus antara 08:00 - 17:00.'
+            ], 422);
+        }
+
+        // validasi konflik jadwal meeting
+        $conflict = MeetingRequests::whereDate('date', $tanggal)
+            ->whereNotIn('status', ['rejected', 'done'])
+            ->where(function ($query) use ($timeStart, $timeEnd) {
+                $query
+                    // Case 1: jam mulai baru ada di antara meeting yang sudah ada
+                    ->whereRaw("TIME(date) < ? AND SUBSTR(time_end, 1, 5) > ?", [$timeEnd, $timeStart])
+                    // Case 2: jam mulai sama persis
+                    ->orWhereRaw("TIME(date) = ?", [$timeStart]);
+            })
+            ->exists();
+
+        if ($conflict) {
+            return response()->json([
+                'message' => 'Tidak bisa membuat meeting — sudah ada jadwal lain pada waktu tersebut. Pilih jam yang berbeda.'
+            ], 422);
+        }
+
+        // handle file upload jika ada
         $attachmentPath = null;
         if ($request->hasFile('attachment')) {
             $attachmentPath = $request->file('attachment')
@@ -29,11 +65,12 @@ class MeetingController extends Controller
             'title' => $request->title,
             'description' => $request->description,
             'date' => $request->date,
+            'time_end'    => $request->time_end,
             'attachment' => $attachmentPath,
         ]);
 
         return response()->json([
-            'message' => 'Meeting dibuat',
+            'message' => 'Meeting berhasil dibuat dan menunggu persetujuan admin.',
             'data' => $meeting
         ], 201);
     }
