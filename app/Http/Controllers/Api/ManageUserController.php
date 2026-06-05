@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ActivityLogger;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -66,18 +67,46 @@ class ManageUserController extends Controller
 
         $user->update(['status' =>'suspend']);
 
+        // Catat activity
+        ActivityLogger::log(
+            $authUser->id,
+            'suspend_user',
+            'user',
+            'Mensuspend user: ' . $user->name . ' (' . $user->email . ')',
+            ['target_user_id' => $user->id]
+        );
+        
         return response()->json(['message' => 'User berhasil disuspend.']);
     }
 
     // Unsuspend
     public function active(Request $request, int $id)
     {
-        if (!$this->checkAdmin($request)) {
+        $authUser = $this->checkAdmin($request);
+        if (!$authUser) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
         $user = User::findOrFail($id);
+
+        // tidak bisa suspend akun sendiri
+        if ($user->id === $authUser->id) {
+            return response()->json([
+                'message' => 'Tidak dapat suspend akun sendiri.'
+            ], 422);
+        }
+
+        $user = User::findOrFail($id);
         $user->update(['status' =>'active']);
+
+        // Catat activity
+        ActivityLogger::log(
+            $authUser->id,
+            'activate_user',
+            'user',
+            'Mengaktifkan user: ' . $user->name . ' (' . $user->email . ')',
+            ['target_user_id' => $user->id]
+        );
 
         return response()->json(['message' => 'User berhasil diaktifkan.']);
     }

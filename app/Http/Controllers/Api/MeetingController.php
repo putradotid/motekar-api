@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ActivityLogger;
 use App\Http\Controllers\Controller;
 use App\Models\MeetingRequests;
 use Illuminate\Http\Request;
@@ -195,6 +196,15 @@ class MeetingController extends Controller
             'approved_by' => $user->id
         ]);
 
+        // Catat activity
+        ActivityLogger::log(
+            $user->id,
+            'approve_meeting',
+            'meeting',
+            'Menyetujui meeting request: ' . $meeting->title,
+            ['meeting_id' => $meeting->id, 'user_id' => $meeting->user_id]
+        );
+
         return response()->json($meeting);
     }
 
@@ -211,6 +221,15 @@ class MeetingController extends Controller
             'approved_by' => $user->id
         ]);
 
+        // Catat activity
+        ActivityLogger::log(
+            $user->id,
+            'reject_meeting',
+            'meeting',
+            'Menolak meeting request: ' . $meeting->title,
+            ['meeting_id' => $meeting->id, 'user_id' => $meeting->user_id]
+        );
+
         return response()->json($meeting);
     }
 
@@ -225,6 +244,15 @@ class MeetingController extends Controller
 
         $meeting->update(['status' => 'done']);
 
+        // Catat activity
+        ActivityLogger::log(
+            $user->id,
+            'done_meeting',
+            'meeting',
+            'Menyelesaikan meeting: ' . $meeting->title,
+            ['meeting_id' => $meeting->id]
+        );
+        
         return response()->json($meeting);
     }
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\ActivityLogController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ProfileController;
@@ -52,6 +53,9 @@ Route::middleware('auth.token')->group(function() {
     Route::post('/admin/media', [MediaController::class, 'store']);
     Route::get('/admin/media/{id}', [MediaController::class, 'show']);
     Route::delete('/admin/media/{id}', [MediaController::class, 'destroy']);
+
+    // activity log
+    Route::get('/admin/activity-logs', [ActivityLogController::class, 'index']);
 
     // logout
     Route::post('/logout', [AuthController::class, 'logout']);
