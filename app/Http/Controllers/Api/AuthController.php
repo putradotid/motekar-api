@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ActivityLogger;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -38,6 +39,15 @@ class AuthController extends Controller
         // simpan token ke database
         $user->api_token = $token;
         $user->save();
+
+        // log aktivitas login
+        ActivityLogger::log(
+            $user->id,
+            'login',
+            'auth',
+            $user->name . ' berhasil login',
+            ['role' => $user->role]
+        );
 
         return response()->json([
             'message' => 'login berhasil',
@@ -93,6 +103,14 @@ class AuthController extends Controller
             'role' => $request->role,
         ]);
 
+        ActivityLogger::log(
+            $authUser->id,
+            'create_user',
+            'user',
+            'Membuat akun baru: ' . $user->name . ' dengan role ' . $user->role,
+            ['new_user_id' => $user->id, 'role' => $user->role]
+        );
+
         return response()->json([
             'message' => 'User berhasil dibuat',
             'user' => $user
@@ -106,6 +124,14 @@ class AuthController extends Controller
         $user->api_token = null;
         $user->save();
 
+        // log aktivitas logout
+        ActivityLogger::log(
+            $user->id,
+            'logout',
+            'auth',
+            $user->name . ' berhasil logout',
+            ['role' => $user->role]
+        );
         return response()->json([
             'message' => 'Logout berhasil'
         ]);

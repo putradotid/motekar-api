@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ActivityLogger;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Media;
@@ -65,6 +66,14 @@ class MediaController extends Controller
             'uploaded_by' => $admin->id,
         ]);
 
+        ActivityLogger::log(
+            $admin->id,
+            'upload_media',
+            'media',
+            'Mengupload media: ' . $media->filename . ' (kategori: ' . $media->category . ')',
+            ['media_id' => $media->id]
+        );
+
         return response()->json([
             'message' => 'Media berhasil diupload.',
             'data'    => $media,
@@ -100,6 +109,14 @@ class MediaController extends Controller
         // hapus record dari database
         $media->delete();
 
+        ActivityLogger::log(
+            $admin->id,
+            'delete_media',
+            'media',
+            'Menghapus media: ' . $media->filename . ' (kategori: ' . $media->category . ')',
+            ['media_id' => $media->id]
+        );
+        
         return response()->json(['message' => 'Media berhasil dihapus.']);
     }
 }
