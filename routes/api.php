@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\ManageUserController;
 use App\Http\Controllers\Api\MeetingController;
 use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\MediaController;
+use App\Http\Controllers\Api\SettingController;
 
 // Auth
 Route::post('/login', [AuthController::class, 'login']);
@@ -54,6 +55,10 @@ Route::middleware('auth.token')->group(function() {
     Route::get('/admin/media/{id}', [MediaController::class, 'show']);
     Route::delete('/admin/media/{id}', [MediaController::class, 'destroy']);
 
+    // setting
+    Route::get('/settings',  [SettingController::class, 'index']);
+    Route::post('/settings', [SettingController::class, 'update']);
+    
     // activity log
     Route::get('/admin/activity-logs', [ActivityLogController::class, 'index']);
 
