@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Message;
+use App\Models\MessageRead;
 use App\Models\MeetingRequests;
 use Illuminate\Http\Request;
 
@@ -48,15 +49,30 @@ class MessageController extends Controller
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
+        // menandai pesan sudah dibaca
+        $messages = Message::where('meeting_request_id', $meetingId)
+            ->where('sender_id', '!=', $user->id)
+            ->get();
+
+        foreach ($messages as $msg) {
+            MessageRead::firstOrCreate([
+                'message_id' => $msg->id,
+                'user_id'    => $user->id,
+            ], [
+                'read_at' => now(),
+            ]);
+        }
+
         $messages = Message::with('sender')
             ->where('meeting_request_id', $meetingId)
             ->oldest()
             ->get()
-            ->map(function ($msg) {
+            ->map(function ($msg) use ($user) {
                 return [
                     'id'         => $msg->id,
                     'message'    => $msg->message,
                     'attachment' => $msg->attachment,
+                    'is_read'    => $msg->reads()->where('user_id', $user->id)->exists(),
                     'sender'     => [
                         'id'   => $msg->sender->id,
                         'name' => $msg->sender->name,
@@ -111,5 +127,27 @@ class MessageController extends Controller
             'time'       => $message->created_at->format('H:i'),
             'date'       => $message->created_at->format('Y-m-d'),
         ], 201);
+    }
+
+    // Tandai pesan sudah dibaca
+    public function markAsRead(Request $request, int $meetingId)
+    {
+        $user = $request->attributes->get('user');
+
+        // Ambil semua pesan di meeting ini yang belum dibaca user
+        $messages = Message::where('meeting_request_id', $meetingId)
+            ->where('sender_id', '!=', $user->id) // hanya pesan dari orang lain
+            ->get();
+
+        foreach ($messages as $message) {
+            MessageRead::firstOrCreate([
+                'message_id' => $message->id,
+                'user_id'    => $user->id,
+            ], [
+                'read_at' => now(),
+            ]);
+        }
+
+        return response()->json(['message' => 'Pesan ditandai sudah dibaca.']);
     }
 }

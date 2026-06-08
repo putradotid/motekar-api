@@ -22,4 +22,14 @@ class Message extends Model
     {
         return $this->belongsTo(MeetingRequests::class, 'meeting_request_id');
     }
+
+    public function reads()
+    {
+        return $this->hasMany(MessageRead::class);
+    }
+
+    public function isReadBy(int $userId): bool
+    {
+        return $this->reads()->where('user_id', $userId)->exists();
+    }
 }

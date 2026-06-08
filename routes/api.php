@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\ManageUserController;
 use App\Http\Controllers\Api\MeetingController;
 use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\MediaController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\SettingController;
 
 // Auth
@@ -61,6 +62,10 @@ Route::middleware('auth.token')->group(function() {
     
     // activity log
     Route::get('/admin/activity-logs', [ActivityLogController::class, 'index']);
+
+    // notification
+    Route::get('/admin/notifications/count', [NotificationController::class, 'notificationCount']);
+    Route::post('/messages/{meetingId}/read', [MessageController::class, 'markAsRead']);
 
     // logout
     Route::post('/logout', [AuthController::class, 'logout']);
