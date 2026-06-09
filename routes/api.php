@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\ActivityLogController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ManageUserController;
 use App\Http\Controllers\Api\MeetingController;
@@ -14,6 +15,9 @@ use App\Http\Controllers\Api\SettingController;
 // Auth
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
+
+// public kirim pesan
+Route::post('/contact', [ContactController::class, 'store']);
 
 Route::middleware('auth.token')->group(function() {
     
@@ -66,6 +70,12 @@ Route::middleware('auth.token')->group(function() {
     // notification
     Route::get('/admin/notifications/count', [NotificationController::class, 'notificationCount']);
     Route::post('/messages/{meetingId}/read', [MessageController::class, 'markAsRead']);
+
+    // pesan masuk dari public
+    Route::get('/admin/contacts', [ContactController::class, 'index']);
+    Route::get('/admin/contacts/{id}', [ContactController::class, 'show']);
+    Route::put('/admin/contacts/{id}/status', [ContactController::class, 'updateStatus']);
+    Route::delete('/admin/contacts/{id}', [ContactController::class, 'destroy']);
 
     // logout
     Route::post('/logout', [AuthController::class, 'logout']);
