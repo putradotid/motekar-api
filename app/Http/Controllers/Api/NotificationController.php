@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MeetingRequests;
 use Illuminate\Http\Request;
 use App\Models\Message;
+use Illuminate\Support\Str;
 
 class NotificationController extends Controller
 {
@@ -18,6 +19,11 @@ class NotificationController extends Controller
 
         // Hitung meeting pending
         $pendingMeetings = MeetingRequests::where('status', 'pending')->count();
+
+        // Meeting hari ini
+        $meetingsToday = MeetingRequests::whereDate('date', today())
+            ->whereIn('status', ['approved', 'pending'])
+            ->count();
 
         // Hitung pesan belum dibaca (meeting yang ada pesan tapi belum dibalas admin)
         $unreadMessages = Message::whereHas('sender', function ($q) {
@@ -42,7 +48,7 @@ class NotificationController extends Controller
         ->map(function ($msg) {
             return [
                 'id'          => $msg->id,
-                'message'     => $msg->message,
+                'message'     => Str::limit($msg->message, 50),
                 'sender_name' => $msg->sender->name,
                 'meeting_id'  => $msg->meeting_request_id,
                 'meeting_title' => $msg->meeting->title ?? '-',
