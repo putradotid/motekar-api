@@ -19,6 +19,9 @@ Route::post('/register', [AuthController::class, 'register']);
 // public kirim pesan
 Route::post('/contact', [ContactController::class, 'store']);
 
+// setting public
+Route::get('/settings',  [SettingController::class, 'index']);
+
 Route::middleware('auth.token')->group(function() {
     
     // route user
@@ -61,7 +64,6 @@ Route::middleware('auth.token')->group(function() {
     Route::delete('/admin/media/{id}', [MediaController::class, 'destroy']);
 
     // setting
-    Route::get('/settings',  [SettingController::class, 'index']);
     Route::post('/settings', [SettingController::class, 'update']);
     
     // activity log
