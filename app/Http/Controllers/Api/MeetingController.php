@@ -280,8 +280,8 @@ class MeetingController extends Controller
             return response()->json(['message' => 'Forbiden'], 403);
         }
 
-        $data =MeetingRequests::selectRaw('MONTH(created_at) as month, YEAR(created_at) as year, COUNT(*) as total')
-            ->where('created_at', '>=', now()->subMonth(6))
+        $data = MeetingRequests::selectRaw('MONTH(date) as month, YEAR(date) as year, COUNT(*) as total')
+            ->whereRaw('date >= ?', [now()->subMonths(6)->startOfMonth()->format('Y-m-d')])
             ->groupBy('year', 'month')
             ->orderBy('year')
             ->orderBy('month')

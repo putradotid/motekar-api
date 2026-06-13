@@ -21,8 +21,8 @@ class NotificationController extends Controller
         $pendingMeetings = MeetingRequests::where('status', 'pending')->count();
 
         // Meeting hari ini
-        $meetingsToday = MeetingRequests::whereDate('date', today())
-            ->whereIn('status', ['approved', 'pending'])
+        $meetingsToday = MeetingRequests::where('status', 'approved')
+            ->whereRaw('DATE(date) = ?', [now()->setTimezone('Asia/Jakarta')->format('Y-m-d')])
             ->count();
 
         // Hitung pesan belum dibaca (meeting yang ada pesan tapi belum dibalas admin)
@@ -60,6 +60,7 @@ class NotificationController extends Controller
             'pending_meetings' => $pendingMeetings,
             'unread_messages'  => $unreadMessages,
             'latest_unread'    => $latestUnread,
+            'meetings_today'   => $meetingsToday,
         ]);
     }
 }

@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\ActivityLogController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ContactController;
+use App\Http\Controllers\Api\HeroSlideController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ManageUserController;
 use App\Http\Controllers\Api\MeetingController;
@@ -16,6 +17,9 @@ use App\Http\Controllers\Api\SettingController;
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
+// public beranda
+Route::get('/hero-slides', [HeroSlideController::class, 'index']);
+
 // public kirim pesan
 Route::post('/contact', [ContactController::class, 'store']);
 
@@ -24,7 +28,7 @@ Route::get('/settings',  [SettingController::class, 'index']);
 
 Route::middleware('auth.token')->group(function() {
     
-    // route user
+    //----- route user ------//
     Route::post('/meetings', [MeetingController::class, 'store']);
     Route::get('/my-meetings', [MeetingController::class, 'myMeetings']);
     Route::get('/my-meetings/stats', [MeetingController::class, 'stats']);
@@ -33,7 +37,14 @@ Route::middleware('auth.token')->group(function() {
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::put('/profile', [ProfileController::class, 'update']);
     
-    // route admin
+    //---- route admin ------//
+    // website management
+    Route::get('/admin/hero-slides',        [HeroSlideController::class, 'adminIndex']);
+    Route::post('/admin/hero-slides',       [HeroSlideController::class, 'store']);
+    Route::put('/admin/hero-slides/{id}',   [HeroSlideController::class, 'update']);
+    Route::delete('/admin/hero-slides/{id}',[HeroSlideController::class, 'destroy']);
+    
+    // dashboard
     Route::get('/admin/meetings/recent', [MeetingController::class, 'recentMeeting']);
     Route::get('/admin/meetings/monthly', [MeetingController::class, 'monthlyStats']);
     Route::get('/admin/meetings/calendar', [MeetingController::class, 'calendarEvents']);

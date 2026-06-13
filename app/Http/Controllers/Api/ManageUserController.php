@@ -30,7 +30,7 @@ class ManageUserController extends Controller
         $search = $request->get('search', '');
         $status = $request->get('status', '');
         $role = $request->get('role', '');
-        $perPage = $request->get('perPage', 10);
+        $perPage = $request->get('per_page', 10);
 
         $users = User::where('id', '!=', $authUser->id)
             ->when($search, function ($query) use ($search){
@@ -43,7 +43,7 @@ class ManageUserController extends Controller
                 $query->where('role', $role);
             })
             ->latest()
-            ->paginate();
+            ->paginate($perPage);
         
         return response()->json($users);
     }
