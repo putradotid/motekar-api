@@ -18,6 +18,15 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AdminUserSeeder::class,
             SettingSeeder::class,
+            DummyDataMeetings::class,
+
+            // halaman depan
+            HeroSlideSeeder::class,
+            StatsPageSeeder::class,
+            ServiceSeeder::class,
+            CallToActionSeeder::class,
+            
+            AboutUsPageSeeder::class,
         ]);
     }
 }

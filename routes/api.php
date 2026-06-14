@@ -1,10 +1,12 @@
 <?php
 
+use App\Http\Controllers\Api\AboutPageController;
+use App\Http\Controllers\Api\AboutUsController;
 use App\Http\Controllers\Api\ActivityLogController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ContactController;
-use App\Http\Controllers\Api\HeroSlideController;
+use App\Http\Controllers\Api\HomePageController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ManageUserController;
 use App\Http\Controllers\Api\MeetingController;
@@ -18,7 +20,10 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 
 // public beranda
-Route::get('/hero-slides', [HeroSlideController::class, 'index']);
+Route::get('/homepage', [HomePageController::class, 'show']);
+
+// public tentang kami
+Route::get('/tentang-kami-page', [AboutUsController::class, 'show']);
 
 // public kirim pesan
 Route::post('/contact', [ContactController::class, 'store']);
@@ -39,10 +44,34 @@ Route::middleware('auth.token')->group(function() {
     
     //---- route admin ------//
     // website management
-    Route::get('/admin/hero-slides',        [HeroSlideController::class, 'adminIndex']);
-    Route::post('/admin/hero-slides',       [HeroSlideController::class, 'store']);
-    Route::put('/admin/hero-slides/{id}',   [HeroSlideController::class, 'update']);
-    Route::delete('/admin/hero-slides/{id}',[HeroSlideController::class, 'destroy']);
+    Route::get('/admin/homepage', [HomePageController::class, 'index']);
+
+    // Hero
+    Route::post('/admin/homepage/hero', [HomePageController::class, 'storeHero']);
+    Route::put('/admin/homepage/hero/{id}', [HomePageController::class, 'updateHero']);
+    Route::delete('/admin/homepage/hero/{id}', [HomePageController::class, 'destroyHero']);
+
+    // About
+    Route::post('/admin/homepage/about', [HomePageController::class, 'storeAbout']);
+    Route::put('/admin/homepage/about/{id}', [HomePageController::class, 'updateAbout']);
+
+    // Stats
+    Route::post('/admin/homepage/stats', [HomePageController::class, 'storeStats']);
+    Route::put('/admin/homepage/stats/{id}', [HomePageController::class, 'updateStats']);
+
+    // Services
+    Route::post('/admin/homepage/services', [HomePageController::class, 'storeService']);
+    Route::put('/admin/homepage/services/{id}', [HomePageController::class, 'updateService']);
+    Route::delete('/admin/homepage/services/{id}', [HomePageController::class, 'destroyService']);
+
+    // CTA
+    Route::post('/admin/homepage/cta', [HomePageController::class, 'storeCta']);
+    Route::put('/admin/homepage/cta/{id}', [HomePageController::class, 'updateCta']);
+
+    // Tentang Kami
+    Route::get('/admin/tentang-kami',     [AboutUsController::class, 'index']);
+    Route::post('/admin/tentang-kami',    [AboutUsController::class, 'store']);
+    Route::put('/admin/tentang-kami/{id}',[AboutUsController::class, 'update']);
     
     // dashboard
     Route::get('/admin/meetings/recent', [MeetingController::class, 'recentMeeting']);
