@@ -27,6 +27,8 @@ class DatabaseSeeder extends Seeder
             CallToActionSeeder::class,
             
             AboutUsPageSeeder::class,
+            ProdukLayananSeeder::class,
+            TestimoniSeeder::class,
         ]);
     }
 }
