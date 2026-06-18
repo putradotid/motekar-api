@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Api\AboutPageController;
 use App\Http\Controllers\Api\AboutUsController;
 use App\Http\Controllers\Api\ActivityLogController;
 use Illuminate\Support\Facades\Route;
@@ -16,6 +15,7 @@ use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ProdukLayananController;
 use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\TestimoniController;
+use App\Http\Controllers\Api\TimKamiController;
 
 // Auth
 Route::post('/login', [AuthController::class, 'login']);
@@ -32,6 +32,9 @@ Route::get('/produk-layanan-page', [ProdukLayananController::class, 'show']);
 
 // public testimoni
 Route::get('/testimoni-page', [TestimoniController::class, 'show']);
+
+// public tim kami
+Route::get('/tim-kami-page', [TimKamiController::class, 'show']);
 
 // public kirim pesan
 Route::post('/contact', [ContactController::class, 'store']);
@@ -118,6 +121,16 @@ Route::middleware('auth.token')->group(function() {
     Route::put('/admin/meetings/{id}/approved', [MeetingController::class, 'approved']);
     Route::put('/admin/meetings/{id}/reject', [MeetingController::class, 'reject']);
     Route::put('/admin/meetings/{id}/done', [MeetingController::class, 'done']);
+
+    // Tim Kami
+    Route::get('/admin/tim-kami',          [TimKamiController::class, 'index']);
+    // Hero
+    Route::post('/admin/tim-kami/hero',    [TimKamiController::class, 'storeHero']);
+    Route::put('/admin/tim-kami/hero/{id}',[TimKamiController::class, 'updateHero']);
+    // Team Members (semua divisi pakai endpoint sama)
+    Route::post('/admin/tim-kami/members',       [TimKamiController::class, 'storeMember']);
+    Route::put('/admin/tim-kami/members/{id}',   [TimKamiController::class, 'updateMember']);
+    Route::delete('/admin/tim-kami/members/{id}',[TimKamiController::class, 'destroyMember']);
 
     // create admin
     Route::post('/admin/users', [AuthController::class, 'createdAdmin']);

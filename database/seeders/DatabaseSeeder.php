@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
             AboutUsPageSeeder::class,
             ProdukLayananSeeder::class,
             TestimoniSeeder::class,
+            TimKamiSeeder::class,
         ]);
     }
 }
