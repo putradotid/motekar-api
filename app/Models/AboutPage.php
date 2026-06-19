@@ -10,7 +10,11 @@ class AboutPage extends Model
         'title',
         'description',
         'image_url',
-        'vision',
-        'mission',
+        'image_1',
+        'image_2',
+        'image_3',
+        'image_4',
+        'image_5',
+        'image_6',
     ];
 }

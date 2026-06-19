@@ -9,6 +9,9 @@ use App\Models\AboutPage;
 use App\Models\StatsPage;
 use App\Models\Service;
 use App\Models\CallToAction;
+use App\Models\ClientPartner;
+use App\Models\MeetingRequests;
+use App\Models\TeamMember;
 use Illuminate\Http\Request;
 
 class HomePageController extends Controller
@@ -18,10 +21,27 @@ class HomePageController extends Controller
     {
         return response()->json([
             'hero'     => HeroSlide::where('is_active', true)->orderBy('order')->get(),
-            'about'    => AboutPage::first(),
-            'stats'    => StatsPage::first(),
-            'services' => Service::where('is_active', true)->orderBy('order')->get(),
-            'cta'      => CallToAction::first(),
+        'about'    => AboutPage::first(),
+        'stats'    => [
+            [
+                'label' => 'Request Meeting',
+                'value' => MeetingRequests::count(),
+            ],
+            [
+                'label' => 'Meeting Selesai',
+                'value' => MeetingRequests::where('status', 'done')->count(),
+            ],
+            [
+                'label' => 'Tenaga Profesional',
+                'value' => TeamMember::where('is_active', true)->count(),
+            ],
+            [
+                'label' => 'Mitra Kolaborasi',
+                'value' => ClientPartner::where('is_active', true)->count(),
+            ],
+        ],
+        'services' => Service::where('is_active', true)->orderBy('order')->get(),
+        'cta'      => CallToAction::first(),
         ]);
     }
 
@@ -36,7 +56,24 @@ class HomePageController extends Controller
         return response()->json([
             'hero'     => HeroSlide::orderBy('order')->get(),
             'about'    => AboutPage::first(),
-            'stats'    => StatsPage::first(),
+            'stats'    => [
+                [
+                    'label' => 'Request Meeting',
+                    'value' => MeetingRequests::count(),
+                ],
+                [
+                    'label' => 'Meeting Selesai',
+                    'value' => MeetingRequests::where('status', 'done')->count(),
+                ],
+                [
+                    'label' => 'Tenaga Profesional',
+                    'value' => TeamMember::where('is_active', true)->count(),
+                ],
+                [
+                    'label' => 'Mitra Kolaborasi',
+                    'value' => ClientPartner::where('is_active', true)->count(),
+                ],
+            ],
             'services' => Service::orderBy('order')->get(),
             'cta'      => CallToAction::first(),
         ]);
@@ -133,11 +170,19 @@ class HomePageController extends Controller
             'title'       => 'required|string|max:255',
             'description' => 'nullable|string',
             'image_url'   => 'nullable|string',
-            'vision'      => 'nullable|string',
-            'mission'     => 'nullable|string',
+            'image_1'     => 'nullable|string',
+            'image_2'     => 'nullable|string',
+            'image_3'     => 'nullable|string',
+            'image_4'     => 'nullable|string',
+            'image_5'     => 'nullable|string',
+            'image_6'     => 'nullable|string',
         ]);
 
-        $data = $request->only(['title', 'description', 'image_url', 'vision', 'mission']);
+        $data = $request->only([
+            'title', 'description', 'image_url',
+            'image_1', 'image_2', 'image_3',
+            'image_4', 'image_5', 'image_6',
+        ]);
 
         $about = AboutPage::create($data);
 
@@ -157,13 +202,22 @@ class HomePageController extends Controller
             'title'       => 'required|string|max:255',
             'description' => 'nullable|string',
             'image_url'   => 'nullable|string',
-            'vision'      => 'nullable|string',
-            'mission'     => 'nullable|string',
+            'image_1'     => 'nullable|string',
+            'image_2'     => 'nullable|string',
+            'image_3'     => 'nullable|string',
+            'image_4'     => 'nullable|string',
+            'image_5'     => 'nullable|string',
+            'image_6'     => 'nullable|string',
         ]);
 
         $about = AboutPage::findOrFail($id);
 
-        $data = $request->only(['title', 'description', 'image_url', 'vision', 'mission']);
+        $data = $request->only([
+            'title', 'description', 'image_url',
+            'image_1', 'image_2', 'image_3',
+            'image_4', 'image_5', 'image_6',
+        ]);
+
         $about->update($data);
         $about->refresh();
 
