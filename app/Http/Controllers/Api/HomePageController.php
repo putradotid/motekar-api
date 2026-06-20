@@ -10,6 +10,7 @@ use App\Models\StatsPage;
 use App\Models\Service;
 use App\Models\CallToAction;
 use App\Models\ClientPartner;
+use App\Models\HomepageServiceSection;
 use App\Models\MeetingRequests;
 use App\Models\TeamMember;
 use Illuminate\Http\Request;
@@ -40,7 +41,7 @@ class HomePageController extends Controller
                 'value' => ClientPartner::where('is_active', true)->count(),
             ],
         ],
-        'services' => Service::where('is_active', true)->orderBy('order')->take(4)->get(),
+        'service_section' => HomepageServiceSection::first(),
         'cta'      => CallToAction::first(),
         ]);
     }
@@ -74,7 +75,7 @@ class HomePageController extends Controller
                     'value' => ClientPartner::where('is_active', true)->count(),
                 ],
             ],
-            'services' => Service::orderBy('order')->take(4)->get(),
+            'service_section' => HomepageServiceSection::first(),
             'cta'      => CallToAction::first(),
         ]);
     }
@@ -283,59 +284,31 @@ class HomePageController extends Controller
     }
 
     // ==================== SERVICES ====================
-    public function storeService(Request $request)
+    public function storeServiceSection(Request $request)
     {
         $user = $request->attributes->get('user');
         if ($user->role !== 'admin') {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
-        $request->validate([
-            'name'        => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'icon_url'    => 'nullable|string',
-            'image_1'     => 'nullable|string',
-            'image_2'     => 'nullable|string',
-            'image_3'     => 'nullable|string',
-            'image_4'     => 'nullable|string',
-            'order'       => 'nullable|integer',
-        ]);
+        $data = $request->only(['title', 'description', 'image_1', 'image_2', 'image_3', 'image_4']);
+        $section = HomepageServiceSection::create($data);
 
-        $data = $request->only(['name', 'description', 'icon_url', 'image_1', 'image_2', 'image_3', 'image_4', 'order']);
-        $data['is_active'] = true;
-
-        $service = Service::create($data);
-
-        ActivityLogger::log($user->id, 'create_service', 'website', 'Menambahkan layanan', ['service_id' => $service->id]);
-
-        return response()->json(['message' => 'Layanan berhasil ditambahkan.', 'data' => $service], 201);
+        return response()->json(['message' => 'Section berhasil disimpan.', 'data' => $section], 201);
     }
 
-    public function updateService(Request $request, int $id)
+    public function updateServiceSection(Request $request, int $id)
     {
         $user = $request->attributes->get('user');
         if ($user->role !== 'admin') {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
-        $request->validate([
-            'name'        => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'icon_url'    => 'nullable|string',
-            'order'       => 'nullable|integer',
-        ]);
+        $section = HomepageServiceSection::findOrFail($id);
+        $section->update($request->only(['title', 'description', 'image_1', 'image_2', 'image_3', 'image_4']));
+        $section->refresh();
 
-        $service = Service::findOrFail($id);
-
-        $data = $request->only(['name', 'description', 'icon_url', 'order']);
-        $data['is_active'] = $request->boolean('is_active');
-
-        $service->update($data);
-        $service->refresh();
-
-        ActivityLogger::log($user->id, 'update_service', 'website', 'Mengupdate layanan', ['service_id' => $id]);
-
-        return response()->json(['message' => 'Layanan berhasil diupdate.', 'data' => $service]);
+        return response()->json(['message' => 'Section berhasil diupdate.', 'data' => $section]);
     }
 
     public function destroyService(Request $request, int $id)

@@ -67,9 +67,8 @@ Route::middleware('auth.token')->group(function() {
     Route::post('/admin/homepage/stats', [HomePageController::class, 'storeStats']);
     Route::put('/admin/homepage/stats/{id}', [HomePageController::class, 'updateStats']);
     // Services
-    Route::post('/admin/homepage/services', [HomePageController::class, 'storeService']);
-    Route::put('/admin/homepage/services/{id}', [HomePageController::class, 'updateService']);
-    Route::delete('/admin/homepage/services/{id}', [HomePageController::class, 'destroyService']);
+    Route::post('/admin/homepage/services', [HomePageController::class, 'storeServiceSection']);
+    Route::put('/admin/homepage/services/{id}', [HomePageController::class, 'updateServiceSection']);
     // CTA
     Route::post('/admin/homepage/cta', [HomePageController::class, 'storeCta']);
     Route::put('/admin/homepage/cta/{id}', [HomePageController::class, 'updateCta']);
