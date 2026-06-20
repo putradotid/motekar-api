@@ -40,7 +40,7 @@ class HomePageController extends Controller
                 'value' => ClientPartner::where('is_active', true)->count(),
             ],
         ],
-        'services' => Service::where('is_active', true)->orderBy('order')->get(),
+        'services' => Service::where('is_active', true)->orderBy('order')->take(4)->get(),
         'cta'      => CallToAction::first(),
         ]);
     }
@@ -74,7 +74,7 @@ class HomePageController extends Controller
                     'value' => ClientPartner::where('is_active', true)->count(),
                 ],
             ],
-            'services' => Service::orderBy('order')->get(),
+            'services' => Service::orderBy('order')->take(4)->get(),
             'cta'      => CallToAction::first(),
         ]);
     }
@@ -294,10 +294,14 @@ class HomePageController extends Controller
             'name'        => 'required|string|max:255',
             'description' => 'nullable|string',
             'icon_url'    => 'nullable|string',
+            'image_1'     => 'nullable|string',
+            'image_2'     => 'nullable|string',
+            'image_3'     => 'nullable|string',
+            'image_4'     => 'nullable|string',
             'order'       => 'nullable|integer',
         ]);
 
-        $data = $request->only(['name', 'description', 'icon_url', 'order']);
+        $data = $request->only(['name', 'description', 'icon_url', 'image_1', 'image_2', 'image_3', 'image_4', 'order']);
         $data['is_active'] = true;
 
         $service = Service::create($data);
