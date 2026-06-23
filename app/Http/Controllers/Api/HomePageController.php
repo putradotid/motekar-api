@@ -294,6 +294,8 @@ class HomePageController extends Controller
         $data = $request->only(['title', 'description', 'image_1', 'image_2', 'image_3', 'image_4']);
         $section = HomepageServiceSection::create($data);
 
+        ActivityLogger::log($user->id, 'create_service_section', 'website', 'Membuat section layanan homepage');
+
         return response()->json(['message' => 'Section berhasil disimpan.', 'data' => $section], 201);
     }
 
@@ -307,6 +309,8 @@ class HomePageController extends Controller
         $section = HomepageServiceSection::findOrFail($id);
         $section->update($request->only(['title', 'description', 'image_1', 'image_2', 'image_3', 'image_4']));
         $section->refresh();
+
+        ActivityLogger::log($user->id, 'update_service_section', 'website', 'Mengupdate section layanan homepage');
 
         return response()->json(['message' => 'Section berhasil diupdate.', 'data' => $section]);
     }
@@ -343,9 +347,10 @@ class HomePageController extends Controller
             'description' => 'nullable|string',
             'button_text' => 'nullable|string|max:100',
             'button_url'  => 'nullable|string|max:255',
+            'icon_url'
         ]);
 
-        $data = $request->only(['title', 'description', 'button_text', 'button_url']);
+        $data = $request->only(['title', 'description', 'button_text', 'button_url', 'icon_url']);
 
         $cta = CallToAction::create($data);
 
@@ -370,7 +375,7 @@ class HomePageController extends Controller
 
         $cta = CallToAction::findOrFail($id);
 
-        $data = $request->only(['title', 'description', 'button_text', 'button_url']);
+        $data = $request->only(['title', 'description', 'button_text', 'button_url', 'icon_url']);
         $cta->update($data);
         $cta->refresh();
 
