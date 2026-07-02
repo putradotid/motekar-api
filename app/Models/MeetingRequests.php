@@ -5,6 +5,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use App\Models\Message;
 use App\Models\MeetingLog;
+use Carbon\Carbon;
 
 class MeetingRequests extends Model
 {
@@ -18,6 +19,20 @@ class MeetingRequests extends Model
         'approved_by',
         'attachment',
     ];
+
+    protected $appends = ['display_status'];
+
+    public function getDisplayStatusAttribute(): string
+    {
+        if (
+            $this->status === 'approved' &&
+            Carbon::parse($this->date)->isPast()
+        ) {
+            return 'not_completed';
+        }
+
+        return $this->status;
+    }
 
     public function user()
     {
