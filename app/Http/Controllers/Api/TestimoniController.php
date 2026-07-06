@@ -8,34 +8,69 @@ use App\Models\TestimoniPage;
 use App\Models\Testimonial;
 use App\Models\ClientPartner;
 use App\Models\FeaturedCustomer;
+use App\Models\MeetingRequests;
 use Illuminate\Http\Request;
 
 class TestimoniController extends Controller
 {
     // Public — semua data testimoni
-    public function show()
-    {
+    public function index(Request $request)
+{
+    $user = $request->attributes->get('user');
+
+    if (!$user || $user->role !== 'admin') {
         return response()->json([
-            'hero'        => TestimoniPage::first(),
-            'featured_customers' => FeaturedCustomer::where('is_active', true)->orderBy('order')->get(),
-            'testimonials'=> Testimonial::where('is_active', true)->orderBy('order')->get(),
-            'partners'    => ClientPartner::where('is_active', true)->orderBy('order')->get(),
-        ]);
+            'message' => 'Forbidden'
+        ], 403);
     }
 
-    // Admin — semua data untuk edit
-    public function index(Request $request)
+    return response()->json([
+        'hero' => TestimoniPage::first(),
+
+        'featured_customers' => FeaturedCustomer::orderBy('order')->get(),
+
+        'testimonials' => Testimonial::with('user')
+            ->orderBy('created_at', 'desc')
+            ->get(),
+
+        'partners' => ClientPartner::orderBy('order')->get(),
+    ]);
+}
+    // Public — semua data testimoni
+public function show()
     {
-        $user = $request->attributes->get('user');
-        if ($user->role !== 'admin') {
-            return response()->json(['message' => 'Forbidden'], 403);
-        }
+        $testimonials = Testimonial::with('user')
+            ->where('status', 'approved')
+            ->where('is_active', 1)
+            ->orderBy('order')
+            ->get()
+            ->map(function ($item) {
+
+                return [
+                    'id'            => $item->id,
+                    'title'         => $item->title,
+                    'description'   => $item->description,
+                    'name'          => $item->name,
+                    'social_handle' => $item->social_handle,
+                    'rating'        => $item->rating,
+                    'order'         => $item->order,
+
+                    // Foto diambil dari profile user
+                    'photo' => $item->user && $item->user->photo
+                        ? asset('storage/' . $item->user->photo)
+                        : null,
+                ];
+            });
 
         return response()->json([
-            'hero'        => TestimoniPage::first(),
-            'featured_customers' => FeaturedCustomer::orderBy('order')->get(),
-            'testimonials'=> Testimonial::orderBy('order')->get(),
-            'partners'    => ClientPartner::orderBy('order')->get(),
+            'hero'               => TestimoniPage::first(),
+            'featured_customers' => FeaturedCustomer::where('is_active', true)
+                                        ->orderBy('order')
+                                        ->get(),
+            'testimonials'       => $testimonials,
+            'partners'           => ClientPartner::where('is_active', true)
+                                        ->orderBy('order')
+                                        ->get(),
         ]);
     }
 
@@ -82,74 +117,123 @@ class TestimoniController extends Controller
     }
 
     // ==================== TESTIMONIALS (Section 2) ====================
-    public function storeTestimonial(Request $request)
-    {
-        $user = $request->attributes->get('user');
-        if ($user->role !== 'admin') {
-            return response()->json(['message' => 'Forbidden'], 403);
-        }
+    // public function storeTestimonial(Request $request)
+    // {
+    //     $user = $request->attributes->get('user');
+    //     if ($user->role !== 'user') {
+    //         return response()->json([
+    //             'message' => 'Forbidden'
+    //         ], 403);
+    //     }
 
-        $request->validate([
-            'photo'         => 'nullable|string',
-            'title'         => 'required|string',
-            'description'   => 'required|string',
-            'name'          => 'required|string|max:255',
-            'social_handle' => 'nullable|string|max:255',
-            'order'         => 'nullable|integer',
-        ]);
+    //     $request->validate([
+    //         'meeting_id'  => 'required|integer',
+    //         'title'       => 'required|string',
+    //         'description' => 'required|string',
+    //         'rating'      => 'required|integer|min:1|max:5',
+    //         'position'    => 'nullable|string|max:255',
+    //         'social_handle' => 'nullable|string|max:255',
+    //     ]);
 
-        $data = $request->only(['photo', 'title', 'description', 'name', 'social_handle', 'order']);
-        $data['is_active'] = true;
+    //     // Cek meeting milik user dan statusnya done
+    //     $meeting = MeetingRequests::where('id', $request->meeting_id)
+    //                               ->where('user_id', $user->id)
+    //                               ->where('status', 'done')
+    //                               ->first();
 
-        $testimonial = Testimonial::create($data);
+    //     if (!$meeting) {
+    //         return response()->json([
+    //             'message' => 'Meeting tidak ditemukan atau belum selesai.'
+    //         ], 422);
+    //     }
 
-        ActivityLogger::log($user->id, 'create_testimonial', 'website', 'Menambahkan testimoni', ['testimonial_id' => $testimonial->id]);
+    //     // Cek sudah pernah testimoni untuk meeting ini
+    //     $existing = Testimonial::where('meeting_id', $request->meeting_id)
+    //                            ->where('user_id', $user->id)
+    //                            ->first();
 
-        return response()->json(['message' => 'Testimoni berhasil ditambahkan.', 'data' => $testimonial], 201);
-    }
+    //     if ($existing) {
+    //         return response()->json([
+    //             'message' => 'Anda sudah memberikan testimoni untuk meeting ini.'
+    //         ], 422);
+    //     }
 
-    public function updateTestimonial(Request $request, int $id)
-    {
-        $user = $request->attributes->get('user');
-        if ($user->role !== 'admin') {
-            return response()->json(['message' => 'Forbidden'], 403);
-        }
+    //     $testimonial = Testimonial::create([
+    //         'user_id'      => $user->id,
+    //         'meeting_id'   => $request->meeting_id,
+    //         'name'         => $user->name,
+    //         'photo'        => $user->photo ?? null,
+    //         'title'        => $request->title,
+    //         'description'  => $request->description,
+    //         'rating'       => $request->rating,
+    //         'position'     => $request->position,
+    //         'social_handle'=> $request->social_handle,
+    //         'status'       => 'pending',
+    //         'is_active'    => false,
+    //         'order'        => 0,
+    //     ]);
 
-        $request->validate([
-            'photo'         => 'nullable|string',
-            'title'         => 'required|string',
-            'description'   => 'required|string',
-            'name'          => 'required|string|max:255',
-            'social_handle' => 'nullable|string|max:255',
-            'order'         => 'nullable|integer',
-        ]);
+    //     return response()->json([
+    //         'message' => 'Testimoni berhasil dikirim. Menunggu persetujuan admin.',
+    //         'data'    => $testimonial,
+    //     ], 201);
+        
+    // }
 
-        $testimonial = Testimonial::findOrFail($id);
+    // Admin — edit testimoni sebelum approve
+    // public function updateTestimonial(Request $request, int $id)
+    // {
+    //     $user = $request->attributes->get('user');
+    //     if ($user->role !== 'admin') {
+    //         return response()->json(['message' => 'Forbidden'], 403);
+    //     }
 
-        $data = $request->only(['photo', 'title', 'description', 'name', 'social_handle', 'order']);
-        $data['is_active'] = $request->boolean('is_active');
+    //     $request->validate([
+    //         'title'        => 'required|string',
+    //         'description'  => 'required|string',
+    //         'name'         => 'required|string|max:255',
+    //         'position'     => 'nullable|string|max:255',
+    //         'social_handle'=> 'nullable|string|max:255',
+    //         'rating'       => 'required|integer|min:1|max:5',
+    //         'photo'        => 'nullable|string',
+    //         'order'        => 'nullable|integer',
+    //     ]);
 
-        $testimonial->update($data);
-        $testimonial->refresh();
+    //     $testimonial = Testimonial::findOrFail($id);
 
-        ActivityLogger::log($user->id, 'update_testimonial', 'website', 'Mengupdate testimoni', ['testimonial_id' => $id]);
+    //     $data = $request->only([
+    //         'title', 'description', 'name', 'position',
+    //         'social_handle', 'rating', 'photo', 'order',
+    //     ]);
+    //     $data['is_active'] = $request->boolean('is_active');
 
-        return response()->json(['message' => 'Testimoni berhasil diupdate.', 'data' => $testimonial]);
-    }
+    //     $testimonial->update($data);
+    //     $testimonial->refresh();
 
-    public function destroyTestimonial(Request $request, int $id)
-    {
-        $user = $request->attributes->get('user');
-        if ($user->role !== 'admin') {
-            return response()->json(['message' => 'Forbidden'], 403);
-        }
+    //     ActivityLogger::log(
+    //         $user->id,
+    //         'update_testimonial',
+    //         'testimoni',
+    //         'Mengupdate testimoni dari: ' . $testimonial->name,
+    //         ['testimonial_id' => $id]
+    //     );
 
-        Testimonial::findOrFail($id)->delete();
+    //     return response()->json(['message' => 'Testimoni berhasil diupdate.', 'data' => $testimonial]);
+    // }
 
-        ActivityLogger::log($user->id, 'delete_testimonial', 'website', 'Menghapus testimoni', ['testimonial_id' => $id]);
+    // public function destroyTestimonial(Request $request, int $id)
+    // {
+    //     $user = $request->attributes->get('user');
+    //     if ($user->role !== 'admin') {
+    //         return response()->json(['message' => 'Forbidden'], 403);
+    //     }
 
-        return response()->json(['message' => 'Testimoni berhasil dihapus.']);
-    }
+    //     Testimonial::findOrFail($id)->delete();
+
+    //     ActivityLogger::log($user->id, 'delete_testimonial', 'website', 'Menghapus testimoni', ['testimonial_id' => $id]);
+
+    //     return response()->json(['message' => 'Testimoni berhasil dihapus.']);
+    // }
 
     // ==================== CLIENT & PARTNERS (Section 3) ====================
     public function storePartner(Request $request)
@@ -280,4 +364,211 @@ class TestimoniController extends Controller
 
         return response()->json(['message' => 'Featured customer berhasil dihapus.']);
     }
+
+    // Cek apakah user bisa submit testimoni untuk meeting tertentu
+    public function canTestify(Request $request, int $meetingId)
+    {
+        $user = $request->attributes->get('user');
+
+        $meeting = MeetingRequests::where('id', $meetingId)
+                                  ->where('user_id', $user->id)
+                                  ->where('status', 'done')
+                                  ->first();
+
+        if (!$meeting) {
+            return response()->json(['can_testify' => false, 'reason' => 'Meeting belum selesai.']);
+        }
+
+        $existing = Testimonial::where('meeting_id', $meetingId)
+                               ->where('user_id', $user->id)
+                               ->first();
+
+        if ($existing) {
+            return response()->json(['can_testify' => false, 'reason' => 'Sudah memberikan testimoni.']);
+        }
+
+        return response()->json(['can_testify' => true]);
+    }
+
+    // Admin — approve testimoni
+    public function approve(Request $request, int $id)
+    {
+        $user = $request->attributes->get('user');
+        if ($user->role !== 'admin') {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $testimonial = Testimonial::findOrFail($id);
+        $testimonial->update([
+            'status'    => 'approved',
+            'is_active' => true,
+        ]);
+
+        ActivityLogger::log(
+            $user->id,
+            'approve_testimonial',
+            'testimoni',
+            'Menyetujui testimoni dari: ' . $testimonial->name,
+            ['testimonial_id' => $id]
+        );
+
+        return response()->json(['message' => 'Testimoni berhasil disetujui.']);
+    }
+
+    // Admin — reject testimoni
+    public function reject(Request $request, int $id)
+    {
+        $user = $request->attributes->get('user');
+        if ($user->role !== 'admin') {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $testimonial = Testimonial::findOrFail($id);
+        $testimonial->update([
+            'status'     => 'rejected',
+            'is_active'  => false,
+            'admin_notes'=> $request->admin_notes ?? null,
+        ]);
+
+        ActivityLogger::log(
+            $user->id,
+            'reject_testimonial',
+            'testimoni',
+            'Menolak testimoni dari: ' . $testimonial->name,
+            ['testimonial_id' => $id]
+        );
+
+        return response()->json(['message' => 'Testimoni ditolak.']);
+    }
+
+    // store testimoni by user
+    public function store(Request $request)
+    {
+        // Ambil user dari middleware
+        $user = $request->attributes->get('user');
+
+        if (!$user || $user->role !== 'user') {
+            return response()->json([
+                'message' => 'Forbidden'
+            ], 403);
+        }
+
+        // Validasi
+        $request->validate([
+            'meeting_id'    => 'required|integer|exists:meeting_requests,id',
+            'title'         => 'required|string|max:255',
+            'description'   => 'required|string',
+            'rating'        => 'required|integer|min:1|max:5',
+            'position'      => 'nullable|string|max:255',
+            'social_handle' => 'nullable|string|max:255',
+        ]);
+
+        // Pastikan meeting milik user & sudah selesai
+        $meeting = MeetingRequests::where('id', $request->meeting_id)
+            ->where('user_id', $user->id)
+            ->where('status', 'done')
+            ->first();
+
+        if (!$meeting) {
+            return response()->json([
+                'message' => 'Meeting tidak ditemukan atau belum selesai.'
+            ], 422);
+        }
+
+        // Pastikan user belum pernah mengirim testimoni
+        $exists = Testimonial::where('meeting_id', $meeting->id)
+            ->where('user_id', $user->id)
+            ->exists();
+
+        if ($exists) {
+            return response()->json([
+                'message' => 'Anda sudah mengirim testimoni untuk meeting ini.'
+            ], 422);
+        }
+
+        // Simpan testimoni
+        $testimonial = Testimonial::create([
+            'meeting_id'    => $meeting->id,
+            'user_id'       => $user->id,
+
+            // otomatis dari user
+            'name'          => $user->name,
+
+            // input user
+            'title'         => $request->title,
+            'description'   => $request->description,
+            'rating'        => $request->rating,
+            'position'      => $request->position,
+            'social_handle' => $request->social_handle,
+
+            // default
+            'status'        => 'pending',
+            'is_active'     => false,
+            'order'         => 0,
+        ]);
+
+        return response()->json([
+            'message' => 'Testimoni berhasil dikirim dan menunggu persetujuan admin.',
+            'data'    => $testimonial
+        ], 201);
+    }
+
+    // Admin — edit testimoni sebelum approve
+    public function update(Request $request, int $id)
+    {
+        $user = $request->attributes->get('user');
+
+        if (!$user || $user->role !== 'admin') {
+            return response()->json([
+                'message' => 'Forbidden'
+            ], 403);
+        }
+
+        $request->validate([
+            'title'         => 'required|string|max:255',
+            'description'   => 'required|string',
+            'name'          => 'required|string|max:255',
+            'position'      => 'nullable|string|max:255',
+            'social_handle' => 'nullable|string|max:255',
+            'rating'        => 'required|integer|min:1|max:5',
+            'photo'         => 'nullable|string',
+            'order'         => 'nullable|integer|min:0',
+            'is_active'     => 'nullable|boolean',
+        ]);
+
+        $testimonial = Testimonial::findOrFail($id);
+
+        $testimonial->update([
+
+            'title'         => $request->title,
+            'description'   => $request->description,
+
+            // admin boleh memperbaiki identitas bila perlu
+            'name'          => $request->name,
+            'position'      => $request->position,
+            'social_handle' => $request->social_handle,
+
+            'rating'        => $request->rating,
+            'photo'         => $request->photo,
+
+            'order'         => $request->order ?? 0,
+
+        ]);
+
+        ActivityLogger::log(
+            $user->id,
+            'update_testimonial',
+            'testimonial',
+            'Mengupdate testimoni dari: '.$testimonial->name,
+            [
+                'testimonial_id' => $testimonial->id
+            ]
+        );
+
+        return response()->json([
+            'message' => 'Testimoni berhasil diperbarui.',
+            'data'    => $testimonial->fresh()
+        ]);
+    }
+    
 }

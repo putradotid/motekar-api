@@ -51,7 +51,10 @@ Route::middleware('auth.token')->group(function() {
     Route::delete('/my-meetings/{id}', [MeetingController::class, 'cancel']);
     
     Route::get('/profile', [ProfileController::class, 'show']);
-    Route::put('/profile', [ProfileController::class, 'update']);
+    Route::match(['PUT', 'POST'], '/profile', [ProfileController::class, 'update']);
+
+    Route::post('/user/testimonials', [TestimoniController::class, 'store']);
+    Route::get('/user/meetings/{meetingId}/can-testify', [TestimoniController::class, 'canTestify']);
     
     //---- route admin ------//
     // website management
@@ -102,9 +105,14 @@ Route::middleware('auth.token')->group(function() {
     Route::put('/admin/testimoni/featured-customers/{id}', [TestimoniController::class, 'updateFeaturedCustomer']);
     Route::delete('/admin/testimoni/featured-customers/{id}', [TestimoniController::class, 'destroyFeaturedCustomer']);
     // Testimonials
-    Route::post('/admin/testimoni/testimonials', [TestimoniController::class, 'storeTestimonial']);
-    Route::put('/admin/testimoni/testimonials/{id}', [TestimoniController::class, 'updateTestimonial']);
-    Route::delete('/admin/testimoni/testimonials/{id}', [TestimoniController::class, 'destroyTestimonial']);
+    // Route::post('/admin/testimoni/testimonials', [TestimoniController::class, 'storeTestimonial']);
+    // Route::put('/admin/testimoni/testimonials/{id}', [TestimoniController::class, 'updateTestimonial']);
+    // Route::delete('/admin/testimoni/testimonials/{id}', [TestimoniController::class, 'destroyTestimonial']);
+    Route::get('/admin/testimoni/pending', [TestimoniController::class, 'index']);
+    Route::put('/admin/testimoni/{id}/approve', [TestimoniController::class, 'approve']);
+    Route::put('/admin/testimoni/{id}/reject', [TestimoniController::class, 'reject']);
+    Route::put('/admin/testimoni/{id}', [TestimoniController::class, 'update']);
+    // Route::put('/admin/testimoni/testimonials/{id}', [TestimoniController::class, 'updateTestimonial']);
     // Client & Partners
     Route::post('/admin/testimoni/partners', [TestimoniController::class, 'storePartner']);
     Route::put('/admin/testimoni/partners/{id}', [TestimoniController::class, 'updatePartner']);

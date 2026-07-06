@@ -6,6 +6,7 @@ use App\Helpers\ActivityLogger;
 use App\Http\Controllers\Controller;
 use App\Models\MeetingRequests;
 use Illuminate\Http\Request;
+use App\Models\Testimonial;
 
 class MeetingController extends Controller
 {
@@ -102,6 +103,13 @@ class MeetingController extends Controller
             })
             ->latest()
             ->paginate($perPage);
+        
+        $data->getCollection()->transform(function ($meeting) use ($user) {
+            $meeting->has_testimoni = \App\Models\Testimonial::where('meeting_id', $meeting->id)
+                                                            ->where('user_id', $user->id)
+                                                            ->exists();
+            return $meeting;
+        });
 
         return response()->json($data);
     }

@@ -24,6 +24,7 @@ class User extends Authenticatable
         'password',
         'phone',
         'address',
+        'photo',
         'role',
         'status',
     ];
@@ -50,5 +51,10 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function testimonials()
+    {
+        return $this->hasMany(Testimonial::class);
     }
 }
