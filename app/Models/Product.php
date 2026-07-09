@@ -8,4 +8,10 @@ class Product extends Model
 {
     protected $fillable = ['title', 'image_url', 'description', 'detail_description', 'order', 'is_active'];
     protected $casts = ['is_active' => 'boolean'];
+
+    public function details()
+    {
+        return $this->hasMany(ProductDetail::class)
+                    ->orderBy('order');
+    }
 }

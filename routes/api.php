@@ -12,6 +12,8 @@ use App\Http\Controllers\Api\MeetingController;
 use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\MediaController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\ProductDetailController;
+use App\Http\Controllers\Api\ServiceDetailController;
 use App\Http\Controllers\Api\ProdukLayananController;
 use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\TestimoniController;
@@ -41,6 +43,18 @@ Route::post('/contact', [ContactController::class, 'store']);
 
 // setting public
 Route::get('/settings',  [SettingController::class, 'index']);
+
+// Public Product Detail
+Route::get(
+    '/products/{id}',
+    [ProdukLayananController::class, 'detail']
+);
+
+// Public Service Detail
+Route::get(
+    '/services/{id}',
+    [ProdukLayananController::class,'detailService']
+);
 
 Route::middleware('auth.token')->group(function() {
     
@@ -94,6 +108,46 @@ Route::middleware('auth.token')->group(function() {
     Route::post('/admin/produk-layanan/services', [ProdukLayananController::class, 'storeService']);
     Route::put('/admin/produk-layanan/services/{id}', [ProdukLayananController::class, 'updateService']);
     Route::delete('/admin/produk-layanan/services/{id}', [ProdukLayananController::class, 'destroyService']);
+    // Product Details
+    Route::get(
+        '/admin/products/{product}/details',
+        [ProductDetailController::class,'index']
+    );
+
+    Route::post(
+        '/admin/product-details',
+        [ProductDetailController::class,'store']
+    );
+
+    Route::put(
+        '/admin/product-details/{id}',
+        [ProductDetailController::class,'update']
+    );
+
+    Route::delete(
+        '/admin/product-details/{id}',
+        [ProductDetailController::class,'destroy']
+    );
+    // Service Details
+    Route::get(
+        '/admin/services/{service}/details',
+        [ServiceDetailController::class,'index']
+    );
+
+    Route::post(
+        '/admin/service-details',
+        [ServiceDetailController::class,'store']
+    );
+
+    Route::put(
+        '/admin/service-details/{id}',
+        [ServiceDetailController::class,'update']
+    );
+
+    Route::delete(
+        '/admin/service-details/{id}',
+        [ServiceDetailController::class,'destroy']
+    );
 
     // Testimoni
     Route::get('/admin/testimoni', [TestimoniController::class, 'index']);

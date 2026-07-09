@@ -11,17 +11,29 @@ use Illuminate\Http\Request;
 
 class ProdukLayananController extends Controller
 {
-    // ✅ Public — semua data produk & layanan
+    // Public — semua data produk & layanan
     public function show()
     {
         return response()->json([
-            'hero'     => ProdukLayananPage::first(),
-            'products' => Product::where('is_active', true)->orderBy('order')->get(),
-            'services' => ServiceItem::where('is_active', true)->orderBy('order')->get(),
+            'hero' => ProdukLayananPage::first(),
+
+            'products' => Product::with([
+                'details' => function ($query) {
+                    $query->where('is_active', true)
+                        ->orderBy('order');
+                }
+            ])
+            ->where('is_active', true)
+            ->orderBy('order')
+            ->get(),
+
+            'services' => ServiceItem::where('is_active', true)
+                ->orderBy('order')
+                ->get(),
         ]);
     }
 
-    // ✅ Admin — semua data untuk edit
+    // Admin — semua data untuk edit
     public function index(Request $request)
     {
         $user = $request->attributes->get('user');
@@ -31,7 +43,13 @@ class ProdukLayananController extends Controller
 
         return response()->json([
             'hero'     => ProdukLayananPage::first(),
-            'products' => Product::orderBy('order')->get(),
+            'products' => Product::with([
+                'details' => function ($query) {
+                    $query->orderBy('order');
+                }
+            ])
+            ->orderBy('order')
+            ->get(),
             'services' => ServiceItem::orderBy('order')->get(),
         ]);
     }
@@ -212,5 +230,53 @@ class ProdukLayananController extends Controller
         ActivityLogger::log($user->id, 'delete_service_item', 'website', 'Menghapus layanan', ['service_id' => $id]);
 
         return response()->json(['message' => 'Layanan berhasil dihapus.']);
+    }
+
+    // ==================== PUBLIC DETAIL PRODUCT ====================
+    public function detail(int $id)
+    {
+        $product = Product::with([
+            'details' => function ($query) {
+                $query->where('is_active', true)
+                    ->orderBy('order');
+            }
+        ])
+        ->where('id', $id)
+        ->where('is_active', true)
+        ->firstOrFail();
+
+        $otherProducts = Product::where('is_active', true)
+            ->where('id', '!=', $product->id)
+            ->orderBy('order')
+            ->get();
+
+        return response()->json([
+            'product' => $product,
+            'other_products' => $otherProducts,
+        ]);
+    }
+
+    // ==================== PUBLIC DETAIL SERVICE ====================
+    public function detailService(int $id)
+    {
+        $service = ServiceItem::with([
+            'details' => function ($query) {
+                $query->where('is_active', true)
+                    ->orderBy('order');
+            }
+        ])
+        ->where('id', $id)
+        ->where('is_active', true)
+        ->firstOrFail();
+
+        $otherServices = ServiceItem::where('is_active', true)
+            ->where('id', '!=', $service->id)
+            ->orderBy('order')
+            ->get();
+
+        return response()->json([
+            'service' => $service,
+            'other_services' => $otherServices,
+        ]);
     }
 }
