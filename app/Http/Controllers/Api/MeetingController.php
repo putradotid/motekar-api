@@ -69,6 +69,7 @@ class MeetingController extends Controller
             'date' => $request->date,
             'time_end'    => $request->time_end,
             'attachment' => $attachmentPath,
+            'status' => 'pending',
         ]);
 
         return response()->json([
