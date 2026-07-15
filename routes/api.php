@@ -228,6 +228,8 @@ Route::middleware('auth.token')->group(function() {
     Route::put('/admin/contacts/{id}/status', [ContactController::class, 'updateStatus']);
     Route::delete('/admin/contacts/{id}', [ContactController::class, 'destroy']);
 
+    // reschedule
+    Route::put('/admin/meetings/{id}/reschedule', [MeetingController::class, 'reschedule']);
     // logout
     Route::post('/logout', [AuthController::class, 'logout']);
 });

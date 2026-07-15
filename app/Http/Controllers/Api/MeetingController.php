@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MeetingRequests;
 use Illuminate\Http\Request;
 use App\Models\Testimonial;
+use Illuminate\Support\Carbon;
 
 class MeetingController extends Controller
 {
@@ -320,5 +321,35 @@ class MeetingController extends Controller
             });
 
         return response()->json($meetings);
+    }
+
+    public function reschedule(Request $request, $id)
+    {
+        $request->validate([
+            'date' => 'required|date',
+            'time_end' => 'required',
+        ]);
+
+        $meeting = MeetingRequests::find($id);
+
+        if (!$meeting) {
+            return response()->json([
+                'message' => 'Meeting tidak ditemukan.'
+            ], 404);
+        }
+
+        $meeting->date = Carbon::parse($request->date);
+        $meeting->time_end = $request->time_end;
+
+        // Jika status ingin kembali menjadi approved setelah dijadwalkan ulang
+        // sesuaikan dengan alur project Anda
+        $meeting->status = 'approved';
+
+        $meeting->save();
+
+        return response()->json([
+            'message' => 'Meeting berhasil dijadwalkan ulang.',
+            'data' => $meeting
+        ]);
     }
 }
