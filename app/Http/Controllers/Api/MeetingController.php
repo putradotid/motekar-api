@@ -325,6 +325,11 @@ class MeetingController extends Controller
 
     public function reschedule(Request $request, $id)
     {
+        $user = $request->attributes->get('user');
+        if ($user->role !== 'admin') {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+        
         $request->validate([
             'date' => 'required|date',
             'time_end' => 'required',
@@ -344,6 +349,15 @@ class MeetingController extends Controller
         // Jika status ingin kembali menjadi approved setelah dijadwalkan ulang
         // sesuaikan dengan alur project Anda
         $meeting->status = 'approved';
+
+        // Catat activity
+        ActivityLogger::log(
+            $user->id,
+            'reschedule_meeting',
+            'meeting',
+            'Merubah jadwal meeting: ' . $meeting->title,
+            ['meeting_id' => $meeting->id]
+        );
 
         $meeting->save();
 
